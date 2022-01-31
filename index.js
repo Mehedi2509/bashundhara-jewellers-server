@@ -19,11 +19,12 @@ const run = async () => {
         await client.connect();
         const database = client.db('bashundhara_jewellers');
         const productsCollection = database.collection('products');
+        const ordersCollection = database.collection('orders');
         const usersCollection = database.collection('users');
         const reportsCollection = database.collection('reports');
         const reviewsCollection = database.collection('reviews');
 
-        // product database
+        // products database
         app.get('/products', async (req, res) => {
             // const limit = req.query.limit;
             const query = {};
@@ -37,7 +38,35 @@ const run = async () => {
             const query = { _id: ObjectId(id) };
             const result = await productsCollection.findOne(query);
             res.send(result);
-        })
+        });
+
+        app.post('/products', async (req, res) => {
+            const productData = req.body;
+            const result = await productsCollection.insertOne(productData);
+            res.json(result);
+        });
+
+        // orders database
+        app.get('/orders', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const cursor = ordersCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
+        app.post('/orders', async (req, res) => {
+            const orderData = req.body;
+            const result = await ordersCollection.insertOne(orderData);
+            res.json(result);
+        });
+
+        app.get('/orders/:product', async (req, res) => {
+            const product = req.params.product;
+            const query = { _id: ObjectId(product) };
+            const result = await ordersCollection.findOne(query);
+            res.send(result);
+        });
 
         // users database
         app.get('/users/:email', async (req, res) => {
